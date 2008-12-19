@@ -6,6 +6,7 @@ Clean, readable and easy to understand code throughout the application.
 
 ## General
 
+* Two space soft tabs everywhere! (Ruby, JavaScript, CSS, ERB, Haml, Sass ...)
 * DRY it up
 * If the code or spec is not easily understood by looking at it, comment it
 * Use single quotation marks unless you need specifically need to use doubles
