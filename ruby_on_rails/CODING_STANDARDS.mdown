@@ -83,6 +83,7 @@ Clean, readable and easy to understand code throughout the application.
 ## Views and partials
 
 * Avoid logic in views
+* Use Haml and Sass wherever possible, if not exclusively
 * Create valid view markup, do not leave invalid markup to be "fixed" later (easily checked with Firefox developer extensions or WebKit console)
 * In views, for HTML tag parameters, always use double quotes
 * In views, use a spaces between erb braces:
