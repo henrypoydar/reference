@@ -57,7 +57,16 @@ file 'app/views/layouts/application.html.haml', <<-CODE
   %body
   
 CODE
-# 
+
+# Initial stylesheets
+run 'mkdir public/stylesheets/sass'
+file 'public/stylesheets/sass/screen.sass', <<-CODE
+*
+  :margin 0
+  :padding 0
+CODE
+run 'touch public/stylesheets/sass/print.sass'
+
 # Override strftime to accept '&m', '&I' and '&d' as format codes for
 # month, hour and day without padding out to two characters.
 file 'lib/extensions.rb', <<-CODE
@@ -86,8 +95,12 @@ gsub_file 'app/controllers/application_controller.rb', /#\s*(filter_parameter_lo
 
 # Delete all unnecessary files
 run "rm README"
+run "rm doc/README_FOR_APP"
 run "rm public/index.html"
 run "rm public/images/rails.png"
+
+# Setup README'
+run 'touch doc/README.mdown'
 
 # Initialize git repository
 git :init
