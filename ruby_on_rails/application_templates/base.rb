@@ -114,7 +114,7 @@ db/*.sqlite3
 db/schema.rb
 public/stylesheets/*.css
 END
-run 'touch tmp/.gitignore log/.gitignore'
+run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
 # Commit
 git :add => ".", :commit => "-m 'initial commit'"
