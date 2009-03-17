@@ -37,8 +37,7 @@ CODE
 
 # Gems
 gem 'haml'
-gem 'rspec'
-gem 'rspec-rails'
+gem 'rspec-rails', :lib => 'spec'
 
 # Initial application layout
 file 'app/views/layouts/application.html.haml', <<-CODE
