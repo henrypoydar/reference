@@ -35,8 +35,10 @@ when 'automigrate'
 end
 CODE
 
-# Haml dependency
+# Gems
 gem 'haml'
+gem 'rspec'
+gem 'rspec-rails'
 
 # Initial application layout
 file 'app/views/layouts/application.html.haml', <<-CODE
