@@ -76,7 +76,7 @@ run 'touch public/stylesheets/sass/print.sass'
 
 # Override strftime to accept '&m', '&I' and '&d' as format codes for
 # month, hour and day without padding out to two characters.
-file 'lib/extensions.rb', <<-CODE
+file 'lib/time_extension.rb', <<-CODE
 # Override strftime to accept '&m', '&I' and '&d' as format codes for
 # month, hour and day without padding out to two characters.
 class Time
@@ -93,9 +93,77 @@ class Time
 end
 CODE
 
-# Remove :controller :action route
-gsub_file 'config/routes.rb', /\s*(map\.connect ':controller\/:action\/:id')/, '\n#\1'
-gsub_file 'config/routes.rb', /\s*(map\.connect ':controller\/:action\/:id\.:format')/, '\n#\1'
+# Site controller, specs, views
+file 'config/initializers/extensions.rb', <<-CODE
+require 'time_extension'
+CODE
+
+file 'app/controllers/site_controller.rb', <<-CODE
+class SiteController < ApplicationController
+  
+  def index; end
+    
+end
+CODE
+
+run 'mkdir -p app/views/site'
+run 'touch app/views/site/index.html.haml'
+
+run 'mkdir -p spec/controllers'
+run 'mkdir -p spec/views/site'
+
+file 'spec/controllers/site_controller_spec.rb', <<-CODE
+require File.dirname(__FILE__) + '/../spec_helper'
+
+describe SiteController do
+  
+  describe 'routing' do
+    include ActionController::UrlWriter
+
+    it "should route / to the index method" do
+      root_path.should == '/'
+      action = {:controller => 'site', :action => 'index'}
+      route_for(action).should == root_path
+      params_from(:get, root_path).should == action
+    end
+
+  end
+
+  describe '#index' do
+  
+    it "should render the index template" do
+      get(:index)
+      response.should render_template('site/index')
+    end
+  
+  end
+  
+end
+CODE
+
+file 'spec/views/site/index.html.haml_spec', <<-CODE
+require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
+
+describe "/site/index.html.haml" do
+  
+  before(:each) do
+    render
+  end
+
+  it "should render successfully" do
+    response.should be_success
+  end
+end
+CODE
+
+# Remove default routes and clean up the routes file
+file 'config/routes.rb', <<-CODE
+ActionController::Routing::Routes.draw do |map|
+  
+  map.root :controller => 'site'
+  
+end
+CODE
 
 # Filter password in logs
 gsub_file 'app/controllers/application_controller.rb', /#\s*(filter_parameter_logging :password)/, '\1'
