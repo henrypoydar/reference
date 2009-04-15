@@ -121,7 +121,11 @@ db/*.sqlite3
 db/schema.rb
 public/stylesheets/*.css
 END
-run 'touch tmp/.gitignore log/.gitignore'
+run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
+
+# Add plugins as submodules
+plugin 'rspec-on-rails-matchers', :git => 'git://github.com/joshknowles/rspec-on-rails-matchers.git', :submodule => true
+plugin 'ya-rspec-scaffolder', :git => 'git://github.com/hpoydar/ya-rspec-scaffolder.git', :submodule => true
 
 # Commit
 git :add => ".", :commit => "-m 'initial commit'"
