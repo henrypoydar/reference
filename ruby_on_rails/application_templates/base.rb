@@ -1,5 +1,15 @@
+# Gems
+gem 'haml'
+gem 'cucumber'
+gem 'rspec', :lib => false 
+gem 'rspec-rails', :lib => false 
+gem 'webrat' 
+
 # Rspec generation
 generate :rspec
+
+# Cucumber generation
+generate :cucumber
 
 # Database.yml 
 run "rm -rf config/database.yml"
@@ -34,9 +44,6 @@ when 'automigrate'
   silence_stream(STDOUT) {ActiveRecord::Migrator.up("\#{RAILS_ROOT}/db/migrate")}
 end
 CODE
-
-# Haml dependency
-gem 'haml'
 
 # Initial application layout
 file 'app/views/layouts/application.html.haml', <<-CODE
@@ -100,7 +107,7 @@ run "rm public/index.html"
 run "rm public/images/rails.png"
 
 # Setup README'
-run 'touch doc/README.mdown'
+run 'touch doc/README.md'
 
 # Initialize git repository
 git :init
