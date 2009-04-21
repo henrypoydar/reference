@@ -258,6 +258,8 @@ git :init
 
 # Setup .gitignore
 file ".gitignore", <<-END
+.svn
+.DS_Store
 log/*.log
 tmp/**/*
 config/database.yml
