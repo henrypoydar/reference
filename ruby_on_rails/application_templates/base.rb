@@ -263,6 +263,7 @@ tmp/**/*
 config/database.yml
 db/*.sqlite3
 db/schema.rb
+public/system
 public/stylesheets/*.css
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
