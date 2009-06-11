@@ -3,8 +3,8 @@
 ## of everything this template includes
 ##
 
-# Gems
-gem 'haml'
+gem 'haml-edge', :lib => 'haml' 
+gem 'chriseppstein-compass', :lib => "compass", :source => 'http://gems.github.com/' 
 gem 'cucumber'
 gem 'rspec', :lib => false 
 gem 'rspec-rails', :lib => false
@@ -61,8 +61,10 @@ file 'app/views/layouts/application.html.haml', <<-CODE
     %title 
       TODO: Application title
     
-    = stylesheet_link_tag 'screen', :cache => 'all_screen', :media => 'screen'
-    = stylesheet_link_tag 'print', :cache => 'all_print', :media => 'print'
+    = stylesheet_link_tag 'compiled/screen.css', :media => 'screen, projection'
+    = stylesheet_link_tag 'compiled/print.css', :media => 'print'
+    /[if IE]
+      = stylesheet_link_tag 'compiled/ie.css', :media => 'screen, projection'
     
     = sprockets_include_tag
     
@@ -82,14 +84,9 @@ file 'app/views/layouts/application.html.haml', <<-CODE
   
 CODE
 
-# Initial stylesheets
-run 'mkdir public/stylesheets/sass'
-file 'public/stylesheets/sass/screen.sass', <<-CODE
-*
-  :margin 0
-  :padding 0
-CODE
-run 'touch public/stylesheets/sass/print.sass'
+# Initial stylesheets and compass
+run 'compass --rails -f blueprint .'
+run 'touch public/stylesheets/compiled/.gitignore'
 
 # Override strftime to accept '&m', '&I' and '&d' as format codes for
 # month, hour and day without padding out to two characters.
@@ -267,6 +264,7 @@ db/*.sqlite3
 db/schema.rb
 public/system
 public/stylesheets/*.css
+public/stylesheets/complied/*.css
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
@@ -295,6 +293,7 @@ puts '* git SCM'
 puts '* Rspec BDD framework'
 puts '* Cucumber BDD framework'
 puts '* Haml/Sass formatting library'
+puts '* Compass CSS framework manager with Blueprint CSS framework'
 puts '* rspec-on-rails-matchers plugin (git submodule)'
 puts '* ya-rspec-scaffolder plugin (git submodule)'
 puts '* sprockets-rails plugin (git submodule)'
