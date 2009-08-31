@@ -3,7 +3,7 @@
 ## of everything this template includes
 ##
 
-gem 'haml-edge', :lib => 'haml' 
+gem 'haml'
 gem 'chriseppstein-compass', :lib => "compass", :source => 'http://gems.github.com/' 
 gem 'cucumber'
 gem 'rspec', :lib => false 
