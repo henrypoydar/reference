@@ -268,13 +268,9 @@ public/stylesheets/complied/*.css
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
-# Add plugins as submodules
-plugin 'rspec-on-rails-matchers', :git => 'git://github.com/joshknowles/rspec-on-rails-matchers.git', :submodule => true
-plugin 'ya-rspec-scaffolder', :git => 'git://github.com/hpoydar/ya-rspec-scaffolder.git', :submodule => true
-
-# Get submodules
-git :submodule => 'init'
-git :submodule => 'update'
+# Add plugins
+plugin 'rspec-on-rails-matchers', :git => 'git://github.com/joshknowles/rspec-on-rails-matchers.git'
+plugin 'ya-rspec-scaffolder', :git => 'git://github.com/hpoydar/ya-rspec-scaffolder.git'
 
 # Initial commit
 git :add => ".", :commit => "-m 'initial commit'"
@@ -294,9 +290,9 @@ puts '* Rspec BDD framework'
 puts '* Cucumber BDD framework'
 puts '* Haml/Sass formatting library'
 puts '* Compass CSS framework manager with Blueprint CSS framework'
-puts '* rspec-on-rails-matchers plugin (git submodule)'
-puts '* ya-rspec-scaffolder plugin (git submodule)'
-puts '* sprockets-rails plugin (git submodule)'
+puts '* rspec-on-rails-matchers plugin'
+puts '* ya-rspec-scaffolder plugin'
+puts '* sprockets-rails plugin'
 puts '* jQuery (in place of default prototype.js)'
 puts '* sprockets.yml setup for jQuery'
 puts '* DB-in-memory test environment'
