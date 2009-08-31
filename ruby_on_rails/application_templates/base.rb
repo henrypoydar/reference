@@ -268,6 +268,7 @@ public/stylesheets/complied/*.css
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
+
 # Add plugins
 plugin 'rspec-on-rails-matchers', :git => 'git://github.com/joshknowles/rspec-on-rails-matchers.git'
 plugin 'ya-rspec-scaffolder', :git => 'git://github.com/hpoydar/ya-rspec-scaffolder.git'

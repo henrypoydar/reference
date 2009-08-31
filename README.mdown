@@ -1,3 +1,7 @@
 # hpoydar/reference
 
 For storing and versioning various documents, reference materials and scripts.
+
+## Rails application template
+
+    rails <app_name> -m http://github.com/hpoydar/reference/raw/master/ruby_on_rails/application_templates/base.rb 
