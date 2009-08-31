@@ -267,7 +267,7 @@ db/*.sqlite3
 db/schema.rb
 public/system
 public/stylesheets/*.css
-public/stylesheets/complied/*.css
+public/stylesheets/compiled/*.css
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
