@@ -37,6 +37,9 @@ memory-test: &memory-test
 
 test:
   <<: *memory-test
+  
+cucumber:
+  <<: *sqlite-test
 CODE
 run "cp config/database.yml.sample config/database.yml"
 
@@ -282,7 +285,7 @@ run 'rake db:migrate'
 puts 'Running initial specs ...'
 run 'rake spec'
 puts 'Stepping through initial features ...'
-run 'rake features'
+run 'rake cucumber:all'
 
 puts ''
 puts 'Application setup with:'
