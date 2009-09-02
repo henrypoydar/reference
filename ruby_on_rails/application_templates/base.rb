@@ -3,19 +3,27 @@
 ## of everything this template includes
 ##
 
+# Initial gems
 gem 'haml'
 gem 'chriseppstein-compass', :lib => "compass", :source => 'http://gems.github.com/' 
-gem 'cucumber'
-gem 'rspec', :lib => false 
-gem 'rspec-rails', :lib => false
 gem 'sprockets'
-gem 'webrat' 
+gem 'rspec', :lib => 'false'
+gem 'rspec-rails', :lib => 'spec/rails'
 
 # Rspec generation
 generate :rspec
 
 # Cucumber generation
 generate :cucumber
+
+# Update config/environments/test.rb with rspec gem requirements
+run "echo \"\n\nconfig.gem 'rspec', :lib => false, :version => '>=1.2.6' unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
+run "echo \"config.gem 'rspec-rails', :lib => false, :version => '>=1.2.6' unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec-rails'))\" >> config/environments/test.rb"
+
+# Remove testing gems from config/environment.rb so they don't pollute
+# production deployments.  Above we have added them to the test and cucumber 
+# environments already
+run "cat config/environment.rb | sed -e \"/config.gem 'rspec/d\" > config/environment.rb.tmp && rm config/environment.rb && mv config/environment.rb.tmp config/environment.rb"
 
 # Database.yml 
 run "rm -rf config/database.yml"
@@ -220,6 +228,91 @@ ActionController::Routing::Routes.draw do |map|
 end
 CODE
 
+# Add asset minification rake tasks
+file 'lib/tasks/assets.rake', <<-CODE
+namespace :assets do
+  
+  desc "Compiles and concatenates javascripts and stylesheets"
+  task :compile => ['sprockets:install_script', 'sprockets:install_assets'] do
+    puts "Compiled and concatenated javascripts"
+    system "compass -e production --force"
+    puts "Compiled and concatenated stylesheets"
+  end
+  
+  desc "Minifies cached javascript and stylesheets"
+  task :minify do
+    
+    require 'rubygems'
+    require 'jsmin'
+    require 'cssmin'
+  
+    Dir.glob("#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
+      f = ""
+      File.open(css, 'r') {|file| f << CSSMin.minify(file)}
+      File.open(css, 'w') {|file| file.write(f)}
+      puts "Minified #{css}"
+    end
+  
+    Dir.glob("#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js| 
+      f = ""
+      File.open(js, 'r') {|file| f << JSMin.minify(file)}
+      File.open(js, 'w') {|file| file.write(f)}
+      puts "Minified #{js}"
+    end
+  
+  end
+  
+  desc "Remove compiled and concatenated assets"
+  task :cleanup do
+    Dir.glob("#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
+      FileUtils.rm_rf(css)
+      system "git rm #{css}"
+    end
+    puts 'Removed compiled stylesheets'
+    Dir.glob("#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js|
+      FileUtils.rm_rf(js)
+      system "git rm #{js}"
+    end
+    puts 'Removed compiled javascripts'
+  end
+  
+end
+CODE
+
+# Add Heroku deployment rake tasks
+file 'lib/tasks/heroku.rake', <<-CODE
+namespace :heroku do
+  
+  desc "Prepare and deploy the application to heroku"
+  task :deploy => ['heroku:deploy:default']
+  
+  namespace :deploy do
+
+    task :default => ['assets:compile', 'assets:minify', :commit, :push, 'assets:cleanup']
+    
+    desc "Commit pre-deployment changes"
+    task :commit do
+      puts 'Committing deployment changes'
+      system "git add public/stylesheets/compiled public/sprockets.js && git commit -m 'Prepared for heroku deployment'"
+    end
+    
+    desc "Push application to heroku" 
+    task :push do
+      puts 'Pushing application to heroku'
+      system "git push heroku master"
+    end
+    
+    desc "Prepare and deploy the application to heroku and run pending migrations" 
+    task :migrations => :default do
+      puts 'Running pending migrations'
+      system "heroku rake db:migrate"
+    end
+
+  end
+  
+end
+CODE
+
 # Filter password in logs
 gsub_file 'app/controllers/application_controller.rb', /#\s*(filter_parameter_logging :password)/, '\1'
 
@@ -260,17 +353,17 @@ git :init
 file ".gitignore", <<-END
 .svn
 .DS_Store
-log/*.log
-tmp/**/*
+app/stylesheets/.sass-cache
 config/database.yml
 db/*.sqlite3
 db/schema.rb
+log/*.log
 public/system
 public/stylesheets/*.css
 public/stylesheets/compiled/*.css
+tmp/**/*
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
-
 
 # Add plugins
 plugin 'rspec-on-rails-matchers', :git => 'git://github.com/joshknowles/rspec-on-rails-matchers.git'
@@ -294,6 +387,8 @@ puts '* Rspec BDD framework'
 puts '* Cucumber BDD framework'
 puts '* Haml/Sass formatting library'
 puts '* Compass CSS framework manager with Blueprint CSS framework'
+puts '* Asset minification rake tasks'
+puts '* Deployment rake tasks for Heroku'
 puts '* rspec-on-rails-matchers plugin'
 puts '* ya-rspec-scaffolder plugin'
 puts '* sprockets-rails plugin'
