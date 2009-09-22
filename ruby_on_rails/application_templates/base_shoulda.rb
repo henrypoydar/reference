@@ -13,9 +13,9 @@ generate :cucumber
 
 # Update config/environments/test.rb and ../cucumber.rb with shoulda and mocha gem requirements
 %w(test cucumber).each do |e|
-  run "echo \"\n\nconfig.gem 'mocha' unless File.directory?(File.join(Rails.root, 'vendor/plugins/mocha'))\" >> config/environments/#{e}.rb"
-  run "echo \"\nconfig.gem 'thoughtbot-factory_girl', :lib => 'factory_girl', :source => 'http://gems.github.com'\" >> config/environments/#{e}.rb"
-  run "echo \"\nconfig.gem 'thoughtbot-shoulda', :lib => 'shoulda', :source => 'http://gems.github.com' unless File.directory?(File.join(Rails.root, 'vendor/plugins/shoulda'))\" >> config/environments/#{e}.rb"
+  run "echo \"\nconfig.gem 'mocha' unless File.directory?(File.join(Rails.root, 'vendor/plugins/mocha'))\" >> config/environments/#{e}.rb"
+  run "echo \"config.gem 'thoughtbot-factory_girl', :lib => 'factory_girl', :source => 'http://gems.github.com'\" >> config/environments/#{e}.rb"
+  run "echo \"config.gem 'thoughtbot-shoulda', :lib => 'shoulda', :source => 'http://gems.github.com' unless File.directory?(File.join(Rails.root, 'vendor/plugins/shoulda'))\" >> config/environments/#{e}.rb"
 end
 
 # Database.yml 
@@ -45,7 +45,7 @@ CODE
 run "cp config/database.yml.sample config/database.yml"
 
 # Enable auto migration with this initializer.
-# Allows for much faster spec runs with a database in memory.
+# Allows for much faster test runs with a database in memory.
 initializer 'schema_manager.rb', <<-CODE
 case ActiveRecord::Base.configurations[RAILS_ENV]['schema']
 when 'autoload'
@@ -113,7 +113,7 @@ CODE
 initializer 'extensions.rb', <<-CODE
 require 'time_extension'
 CODE
-file 'test/lib/time_extension_spec.rb', <<-CODE
+file 'test/lib/time_extension_test.rb', <<-CODE
 require 'test_helper'
 
 class TimeExtensionTest < Test::Unit::TestCase
@@ -137,7 +137,7 @@ class TimeExtensionTest < Test::Unit::TestCase
 end
 CODE
 
-# Site controller, specs, views
+# Site controller, test, views
 file 'app/controllers/site_controller.rb', <<-CODE
 class SiteController < ApplicationController
   
@@ -219,32 +219,32 @@ namespace :assets do
     require 'jsmin'
     require 'cssmin'
   
-    Dir.glob("#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
+    Dir.glob("\#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
       f = ""
       File.open(css, 'r') {|file| f << CSSMin.minify(file)}
       File.open(css, 'w') {|file| file.write(f)}
-      puts "Minified #{css}"
+      puts "Minified \#{css}"
     end
   
-    Dir.glob("#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js| 
+    Dir.glob("\#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js| 
       f = ""
       File.open(js, 'r') {|file| f << JSMin.minify(file)}
       File.open(js, 'w') {|file| file.write(f)}
-      puts "Minified #{js}"
+      puts "Minified \#{js}"
     end
   
   end
   
   desc "Remove compiled and concatenated assets"
   task :cleanup do
-    Dir.glob("#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
+    Dir.glob("\#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
       FileUtils.rm_rf(css)
-      system "git rm #{css}"
+      system "git rm \#{css}"
     end
     puts 'Removed compiled stylesheets'
-    Dir.glob("#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js|
+    Dir.glob("\#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js|
       FileUtils.rm_rf(js)
-      system "git rm #{js}"
+      system "git rm \#{js}"
     end
     puts 'Removed compiled javascripts'
   end
@@ -341,7 +341,7 @@ run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 # Initial commit
 git :add => ".", :commit => "-m 'initial commit'"
 
-# Run initial specs and features
+# Run initial tests and features
 puts 'Setting up schema ...'
 run 'rake db:migrate'
 puts 'Running initial tests ...'
