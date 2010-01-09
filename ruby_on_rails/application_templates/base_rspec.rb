@@ -5,7 +5,7 @@
 
 # Initial gems
 gem 'haml'
-gem 'chriseppstein-compass', :lib => "compass", :source => 'http://gems.github.com/' 
+gem 'compass'
 gem 'sprockets'
 gem 'rspec', :lib => 'false'
 gem 'rspec-rails', :lib => 'spec/rails'
@@ -14,16 +14,11 @@ gem 'rspec-rails', :lib => 'spec/rails'
 generate :rspec
 
 # Cucumber generation
-generate :cucumber
+run "cucumber --webrat --rspec"
 
 # Update config/environments/test.rb with rspec gem requirements
-run "echo \"\n\nconfig.gem 'rspec', :lib => false, :version => '>=1.2.6' unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
-run "echo \"config.gem 'rspec-rails', :lib => false, :version => '>=1.2.6' unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec-rails'))\" >> config/environments/test.rb"
-
-# Remove testing gems from config/environment.rb so they don't pollute
-# production deployments.  Above we have added them to the test and cucumber 
-# environments already
-run "cat config/environment.rb | sed -e \"/config.gem 'rspec/d\" > config/environment.rb.tmp && rm config/environment.rb && mv config/environment.rb.tmp config/environment.rb"
+run "echo \"\n\nconfig.gem 'rspec', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
+run "echo \"config.gem 'rspec-rails', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec-rails'))\" >> config/environments/test.rb"
 
 # Database.yml 
 run "rm -rf config/database.yml"
@@ -362,6 +357,7 @@ public/system
 public/stylesheets/*.css
 public/stylesheets/compiled/*.css
 tmp/**/*
+*.swp
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 

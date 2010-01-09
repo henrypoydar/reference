@@ -5,11 +5,11 @@
 
 # Initial gems
 gem 'haml'
-gem 'chriseppstein-compass', :lib => "compass", :source => 'http://gems.github.com/' 
+gem 'compass'
 gem 'sprockets'
 
 # Cucumber generation
-generate :cucumber
+run "ruby script/generate cucumber --webrat --testunit"
 
 # Update config/environments/test.rb and ../cucumber.rb with shoulda and mocha gem requirements
 %w(test cucumber).each do |e|
@@ -335,6 +335,7 @@ public/system
 public/stylesheets/*.css
 public/stylesheets/compiled/*.css
 tmp/**/*
+.swp
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
@@ -347,7 +348,7 @@ run 'rake db:migrate'
 puts 'Running initial tests ...'
 run 'rake test'
 puts 'Stepping through initial features ...'
-run 'rake cucumber:all'
+run 'cucumber'
 
 puts ''
 puts 'Application setup with:'
