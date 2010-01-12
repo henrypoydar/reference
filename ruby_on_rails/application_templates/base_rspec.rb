@@ -7,8 +7,8 @@
 gem 'haml'
 gem 'compass'
 gem 'sprockets'
-gem 'rspec', :lib => 'false'
-gem 'rspec-rails', :lib => 'false'
+gem "rspec", :lib => false, :version => ">= 1.2.0"
+gem "rspec-rails", :lib => false, :version => ">= 1.2.0"   
 
 # Rspec generation
 generate :rspec
