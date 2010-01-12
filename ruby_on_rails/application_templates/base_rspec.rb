@@ -16,10 +16,6 @@ generate :rspec
 # Cucumber generation
 run "ruby script/generate cucumber rspec webrat"
 
-# Update config/environments/test.rb with rspec gem requirements
-run "echo \"\n\nconfig.gem 'rspec', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
-run "echo \"config.gem 'rspec-rails', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec-rails'))\" >> config/environments/test.rb"
-
 # Database.yml 
 run "rm -rf config/database.yml"
 file 'config/database.yml.sample', <<-CODE
