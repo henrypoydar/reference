@@ -14,7 +14,7 @@ gem 'rspec-rails', :lib => 'spec/rails'
 generate :rspec
 
 # Cucumber generation
-run "ruby script/generate cucumber --rspec"
+run "ruby script/generate cucumber rspec webrat"
 
 # Update config/environments/test.rb with rspec gem requirements
 run "echo \"\n\nconfig.gem 'rspec', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
