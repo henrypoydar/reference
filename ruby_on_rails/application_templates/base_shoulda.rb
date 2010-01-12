@@ -9,7 +9,7 @@ gem 'compass'
 gem 'sprockets'
 
 # Cucumber generation
-run "ruby script/generate cucumber --webrat --testunit"
+run "ruby script/generate cucumber testunit webrat"
 
 # Update config/environments/test.rb and ../cucumber.rb with shoulda and mocha gem requirements
 %w(test cucumber).each do |e|
