@@ -14,7 +14,7 @@ gem 'rspec-rails', :lib => 'spec/rails'
 generate :rspec
 
 # Cucumber generation
-run "cucumber --webrat --rspec"
+run "ruby script/generate cucumber --webrat --rspec"
 
 # Update config/environments/test.rb with rspec gem requirements
 run "echo \"\n\nconfig.gem 'rspec', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
@@ -374,7 +374,7 @@ run 'rake db:migrate'
 puts 'Running initial specs ...'
 run 'rake spec'
 puts 'Stepping through initial features ...'
-run 'rake cucumber:all'
+run 'cucumber'
 
 puts ''
 puts 'Application setup with:'
