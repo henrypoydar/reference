@@ -7,14 +7,16 @@
 gem 'haml'
 gem 'compass'
 gem 'sprockets'
-gem "rspec", :lib => false, :version => ">= 1.2.0"
-gem "rspec-rails", :lib => false, :version => ">= 1.2.0"   
 
-# Rspec generation
-generate :rspec
+# Update config/environments/test.rb with rspec gem requirements
+run "echo \"\n\nconfig.gem 'rspec', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec'))\" >> config/environments/test.rb"
+run "echo \"config.gem 'rspec-rails', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec-rails'))\" >> config/environments/test.rb"
 
 # Cucumber generation
 run "ruby script/generate cucumber rspec webrat"
+
+# Rspec generation
+generate :rspec
 
 # Database.yml 
 run "rm -rf config/database.yml"
