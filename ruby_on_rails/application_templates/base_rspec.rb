@@ -13,7 +13,7 @@ run "echo \"\n\nconfig.gem 'rspec', :lib => false unless File.directory?(File.jo
 run "echo \"config.gem 'rspec-rails', :lib => false unless File.directory?(File.join(Rails.root, 'vendor/plugins/rspec-rails'))\" >> config/environments/test.rb"
 
 # Cucumber generation
-run "ruby script/generate cucumber rspec webrat"
+run "ruby script/generate cucumber --rspec --webrat"
 
 # Rspec generation
 generate :rspec
