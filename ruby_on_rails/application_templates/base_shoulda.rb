@@ -335,7 +335,7 @@ public/system
 public/stylesheets/*.css
 public/stylesheets/compiled/*.css
 tmp/**/*
-.swp
+*.swp
 END
 run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
