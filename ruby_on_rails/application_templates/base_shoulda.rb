@@ -14,7 +14,7 @@ run "ruby script/generate cucumber --testunit --webrat"
 # Update config/environments/test.rb and ../cucumber.rb with shoulda and mocha gem requirements
 %w(test cucumber).each do |e|
   run "echo \"\nconfig.gem 'mocha' unless File.directory?(File.join(Rails.root, 'vendor/plugins/mocha'))\" >> config/environments/#{e}.rb"
-  run "echo \"config.gem 'factory_girl' >> config/environments/#{e}.rb"
+  run "echo \"config.gem 'factory_girl'\" >> config/environments/#{e}.rb"
   run "echo \"config.gem 'shoulda' unless File.directory?(File.join(Rails.root, 'vendor/plugins/shoulda'))\" >> config/environments/#{e}.rb"
 end
 
