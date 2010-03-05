@@ -395,7 +395,7 @@ file ".gitignore", <<-END
 .bundle
 .DS_Store
 .svn
-.swp
+*.swp
 app/stylesheets/.sass-cache
 config/database.yml
 db/*.sqlite3
