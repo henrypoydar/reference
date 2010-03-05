@@ -110,8 +110,7 @@ run "cp config/database.yml.sample config/database.yml"
 
 # -- Javascripts (jQuery, Jammit)
 
-jquery_file_name = 'jquery-1.4.2.min.js'
-run 'script/plugin install git://github.com/sstephenson/sprockets-rails.git'
+jquery_file_name = 'jquery-1.4.2.js'
 run 'rm -rf public/javascripts/*.js'
 run 'mkdir -p app/javascripts/vendor'
 file 'config/assets.yml', <<-CODE
@@ -149,7 +148,7 @@ class JavascriptsHost
 
   def call(env)
     path = env["PATH_INFO"]
-    if path =~ /^#{Regexp.quote(@location)}/
+    if path.index(@location) == 0
       resp = @file_server.call(env)
       return resp unless resp[0] == 404
     end
