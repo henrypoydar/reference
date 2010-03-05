@@ -1,24 +1,92 @@
 ##
-## See output at the end of this file for a list
+## Rails 2-3-stable Application Template
+## Shoulda, Cucumber, jQuery, Heroku
+##
+## See output at the end of this file for a full list
 ## of everything this template includes
 ##
 
-# Initial gems
-gem 'haml'
+# -- Bundler and gems
+
+file 'Gemfile', <<-CODE
+source :rubygems
+
+gem 'rails', '2.3.5', :require => nil
 gem 'compass'
-gem 'sprockets'
+gem 'haml'
+gem 'jammit'
+gem 'sqlite3-ruby', :require => 'sqlite3'
 
-# Cucumber generation
-run "ruby script/generate cucumber --testunit --webrat"
-
-# Update config/environments/test.rb and ../cucumber.rb with shoulda and mocha gem requirements
-%w(test cucumber).each do |e|
-  run "echo \"\nconfig.gem 'mocha' unless File.directory?(File.join(Rails.root, 'vendor/plugins/mocha'))\" >> config/environments/#{e}.rb"
-  run "echo \"config.gem 'thoughtbot-factory_girl', :lib => 'factory_girl', :source => 'http://gems.github.com'\" >> config/environments/#{e}.rb"
-  run "echo \"config.gem 'thoughtbot-shoulda', :lib => 'shoulda', :source => 'http://gems.github.com' unless File.directory?(File.join(Rails.root, 'vendor/plugins/shoulda'))\" >> config/environments/#{e}.rb"
+group :cucumber do
+  gem 'cucumber'
+  gem 'cucumber-rails'
+  gem 'database_cleaner'
+  gem 'factory_girl'
+  gem 'faker'
+  gem 'redgreen'
+  gem 'rspec', :require => 'spec'
+  gem 'rspec-rails'  
+  gem 'webrat'
 end
 
-# Database.yml 
+group :test do
+  gem 'factory_girl'
+  gem 'faker'
+  gem 'mocha'
+  gem 'redgreen'
+  gem 'shoulda'
+end
+CODE
+
+append_file '/config/preinitializer.rb', %{
+begin
+  # Require the preresolved locked set of gems.
+  require File.expand_path('../../.bundle/environment', __FILE__)
+rescue LoadError
+  # Fallback on doing the resolve at runtime.
+  require "rubygems"
+  require "bundler"
+  if Bundler::VERSION <= "0.9.5"
+    raise RuntimeError, "Bundler incompatible.\n" +
+      "Your bundler version is incompatible with Rails 2.3 and an unlocked bundle.\n" +
+      "Run `gem install bundler` to upgrade or `bundle lock` to lock."
+  else
+    Bundler.setup
+  end
+end
+}.strip
+
+gsub_file 'config/boot.rb', "Rails.boot!", %{
+
+class Rails::Boot
+ def run
+   load_initializer
+   extend_environment
+   Rails::Initializer.run(:set_load_path)
+ end
+
+ def extend_environment
+   Rails::Initializer.class_eval do
+     old_load = instance_method(:load_environment)
+     define_method(:load_environment) do
+       Bundler.require :default, Rails.env
+       old_load.bind(self).call
+     end
+   end
+ end
+end
+
+Rails.boot!
+}
+
+run 'bundle install'
+
+# -- Cucumber setup
+
+run "ruby script/generate cucumber --testunit --webrat"
+
+# -- Database configuration
+
 run "rm -rf config/database.yml"
 file 'config/database.yml.sample', <<-CODE
 development:
@@ -31,31 +99,40 @@ sqlite-test: &sqlite-test
   database: db/test.sqlite3
   timeout: 5000
   
-memory-test: &memory-test
-  adapter: sqlite3
-  database: ":memory:"
-  schema: automigrate
-
 test:
-  <<: *memory-test
+  <<: *sqlite-test
   
 cucumber:
   <<: *sqlite-test
+  database: db/cucumber.sqlite3
 CODE
 run "cp config/database.yml.sample config/database.yml"
 
-# Enable auto migration with this initializer.
-# Allows for much faster test runs with a database in memory.
-initializer 'schema_manager.rb', <<-CODE
-case ActiveRecord::Base.configurations[RAILS_ENV]['schema']
-when 'autoload'
-  silence_stream(STDOUT) {load "\#{RAILS_ROOT}/db/schema.rb"}
-when 'automigrate'
-  silence_stream(STDOUT) {ActiveRecord::Migrator.up("\#{RAILS_ROOT}/db/migrate")}
-end
+# -- Javascripts (jQuery, Jammit)
+
+jquery_file_name = 'jquery-1.4.2.min.js'
+run 'script/plugin install git://github.com/sstephenson/sprockets-rails.git'
+run 'rm -rf public/javascripts/*.js'
+run 'mkdir -p app/javascripts/vendor'
+file 'config/assets.yml', <<-CODE
+javascripts:
+  common:
+    - app/javascripts/vendor/#{jquery_file_name}
+    - app/javascripts/vendor/*.js
+    - app/javascripts/custom/*.js
+    - app/javascripts/application.js
+CODE
+run "curl -L http://jqueryjs.googlecode.com/files/#{jquery_file_name} > app/javascripts/vendor/#{jquery_file_name}"
+file 'app/javascripts/application.js', <<-CODE
+$(document).ready(function() {});
 CODE
 
-# Initial application layout
+# -- Stylesheets and compass
+
+run 'compass --rails -f blueprint .'
+
+# -- Initial application layout
+
 file 'app/views/layouts/application.html.haml', <<-CODE
 !!! XML
 !!!
@@ -70,7 +147,7 @@ file 'app/views/layouts/application.html.haml', <<-CODE
     /[if IE]
       = stylesheet_link_tag 'compiled/ie.css', :media => 'screen, projection'
     
-    = sprockets_include_tag
+    = include_javascripts :common
     
     :javascript
       authenticity_token = '\#{form_authenticity_token}';
@@ -88,12 +165,8 @@ file 'app/views/layouts/application.html.haml', <<-CODE
   
 CODE
 
-# Initial stylesheets and compass
-run 'compass --rails -f blueprint .'
-run 'touch public/stylesheets/compiled/.gitignore'
+# -- Extensions
 
-# Override strftime to accept '&m', '&I' and '&d' as format codes for
-# month, hour and day without padding out to two characters.
 file 'lib/time_extension.rb', <<-CODE
 # Override strftime to accept '&m', '&I' and '&d' as format codes for
 # month, hour and day without padding out to two characters.
@@ -110,9 +183,11 @@ class Time
   end
 end
 CODE
+
 initializer 'extensions.rb', <<-CODE
 require 'time_extension'
 CODE
+
 file 'test/lib/time_extension_test.rb', <<-CODE
 require 'test_helper'
 
@@ -137,7 +212,8 @@ class TimeExtensionTest < Test::Unit::TestCase
 end
 CODE
 
-# Site controller, test, views
+# -- Site controller with tests and views
+
 file 'app/controllers/site_controller.rb', <<-CODE
 class SiteController < ApplicationController
   
@@ -145,9 +221,11 @@ class SiteController < ApplicationController
     
 end
 CODE
+
 run 'mkdir -p app/views/site'
 run 'touch app/views/site/index.html.haml'
 run 'mkdir -p test/functional'
+
 file 'test/functional/site_controller_test.rb', <<-CODE
 require 'test_helper'
 
@@ -168,7 +246,8 @@ class SiteControllerTest < ActionController::TestCase
 end
 CODE
 
-# Initial features
+# -- Initial features
+
 file 'features/home_page.feature', <<-CODE
 Feature: Home Page
   As a web user
@@ -179,6 +258,7 @@ Feature: Home Page
     When I go to the homepage
     Then I should see the homepage
 CODE
+
 file 'features/step_definitions/home_page_steps.rb', <<-CODE
 Given /^I am an outside user$/ do; end
 
@@ -191,32 +271,36 @@ Then /^I should see the homepage$/ do
 end
 CODE
 
-# Remove default routes and clean up the routes file
+# -- Setup routes
+
 file 'config/routes.rb', <<-CODE
 ActionController::Routing::Routes.draw do |map|
   
   map.root :controller => 'site'
-  SprocketsApplication.routes(map) 
+  Jammit::Routes.draw(map)
   
 end
 CODE
 
-# Add asset minification rake tasks
+# -- Asset minification rake tasks
+
+run 'mkdir -p public/assets'
+
 file 'lib/tasks/assets.rake', <<-CODE
 namespace :assets do
   
   desc "Compiles and concatenates javascripts and stylesheets"
-  task :compile => ['sprockets:install_script', 'sprockets:install_assets'] do
+  task :compile do
+    system 'jammit'
     puts "Compiled and concatenated javascripts"
     system "compass -e production --force"
     puts "Compiled and concatenated stylesheets"
   end
   
-  desc "Minifies cached javascript and stylesheets"
+  desc "Minifies cached stylesheets"
   task :minify do
     
     require 'rubygems'
-    require 'jsmin'
     require 'cssmin'
   
     Dir.glob("\#{File.dirname(__FILE__)}/../../public/stylesheets/compiled/*.css").each do |css| 
@@ -224,13 +308,6 @@ namespace :assets do
       File.open(css, 'r') {|file| f << CSSMin.minify(file)}
       File.open(css, 'w') {|file| file.write(f)}
       puts "Minified \#{css}"
-    end
-  
-    Dir.glob("\#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js| 
-      f = ""
-      File.open(js, 'r') {|file| f << JSMin.minify(file)}
-      File.open(js, 'w') {|file| file.write(f)}
-      puts "Minified \#{js}"
     end
   
   end
@@ -242,7 +319,7 @@ namespace :assets do
       system "git rm \#{css}"
     end
     puts 'Removed compiled stylesheets'
-    Dir.glob("\#{File.dirname(__FILE__)}/../../public/sprockets.js").each do |js|
+    Dir.glob("\#{File.dirname(__FILE__)}/../../public/assets/**/*.js").each do |js|
       FileUtils.rm_rf(js)
       system "git rm \#{js}"
     end
@@ -252,7 +329,8 @@ namespace :assets do
 end
 CODE
 
-# Add Heroku deployment rake tasks
+# -- Heroku deployment rake tasks
+
 file 'lib/tasks/heroku.rake', <<-CODE
 namespace :heroku do
   
@@ -286,46 +364,30 @@ namespace :heroku do
 end
 CODE
 
-# Filter password in logs
+# -- Filter password in logs                                                                           
+
 gsub_file 'app/controllers/application_controller.rb', /#\s*(filter_parameter_logging :password)/, '\1'
 
-# Delete all unnecessary files
+# -- Delete all unnecessary files
+
 run "rm README"
 run "rm doc/README_FOR_APP"
 run "rm public/index.html"
 run "rm public/images/rails.png"
 
-# Setup README'
+# -- Setup docs
+
 run 'touch doc/README.md'
 
-# Setup javascripts  (jQuery, sprockets)
-run 'script/plugin install git://github.com/sstephenson/sprockets-rails.git'
-run 'rm -rf public/javascripts/*.js'
-file 'config/sprockets.yml', <<-CODE
-:asset_root: public
-:load_path:
-  - app/javascripts
-  - vendor/sprockets/*/src
-  - vendor/plugins/*/javascripts
-:source_files:
-  - app/javascripts/jquery-*.js
-  - app/javascripts/jquery.*.js
-  - app/javascripts/**/*.js
-  - app/javascripts/application.js
-CODE
-jquery_file_name = 'jquery-1.3.2.min.js'
-run "curl -L http://jqueryjs.googlecode.com/files/#{jquery_file_name} > app/javascripts/#{jquery_file_name}"
-file 'app/javascripts/application.js', <<-CODE
-$(document).ready(function() {});
-CODE
+# -- Git
 
-# Initialize git repository
 git :init
 
-# Setup .gitignore
 file ".gitignore", <<-END
-.svn
+.bundle
 .DS_Store
+.svn
+.swp
 app/stylesheets/.sass-cache
 config/database.yml
 db/*.sqlite3
@@ -335,20 +397,22 @@ public/system
 public/stylesheets/*.css
 public/stylesheets/compiled/*.css
 tmp/**/*
-.swp
 END
-run 'touch tmp/.gitignore log/.gitignore vendor/.gitignore db/.gitignore'
 
-# Initial commit
+run 'touch db/.gitignore log/.gitignore tmp/.gitignore vendor/.gitignore public/assets/.gitignore public/stylesheets/compiled/.gitignore'
+
 git :add => ".", :commit => "-m 'initial commit'"
 
-# Run initial tests and features
+# -- Initial tests and features
+
 puts 'Setting up schema ...'
 run 'rake db:migrate'
 puts 'Running initial tests ...'
 run 'rake test'
 puts 'Stepping through initial features ...'
 run 'cucumber'
+
+# -- Finished!
 
 puts ''
 puts 'Application setup with:'
@@ -357,22 +421,19 @@ puts '* Shoulda TDD framework'
 puts '* Factory Girl fixtures framework'
 puts '* Mocha mocking framework'
 puts '* Cucumber BDD framework'
+puts '* jQuery javascript framework'
 puts '* Haml/Sass formatting library'
 puts '* Compass CSS framework manager with Blueprint CSS framework'
+puts '* Jammit asset management for javascripts'
 puts '* Asset minification rake tasks'
 puts '* Deployment rake tasks for Heroku'
-puts '* sprockets-rails plugin'
-puts '* jQuery (in place of default prototype.js)'
-puts '* sprockets.yml setup for jQuery'
-puts '* DB-in-memory test environment'
 puts '* README documentation converted to markdown'
 puts '* A Time class extension for dropping leading zeros'
 puts "* A general 'site' controller with an index action"
 puts '* A single root path to the site controller'
 puts '* A simple application layout in Haml'
-puts '* Initial controller and view specs'
+puts '* Initial controller and view tests'
 puts '* An initial Cucumber feature'
 puts ''
-
 
 
