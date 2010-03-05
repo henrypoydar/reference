@@ -127,6 +127,43 @@ file 'app/javascripts/application.js', <<-CODE
 $(document).ready(function() {});
 CODE
 
+file 'lib/javascripts_host.rb', <<-CODE
+# Rack middleware for serving individual javascript files
+# from non-public directories to the Jammit asset packager
+# when in test or development modes
+#
+# To use, add this line to the relevant (development)
+# environment file:
+#
+#     config.middleware.use 'JavascriptsHost'  
+#
+
+class JavascriptsHost
+
+  def initialize(app, opts={})
+    @app = app
+    @location = opts[:location] || '/app/javascripts'
+    root = opts[:root] || Dir.pwd
+    @file_server = Rack::File.new(root)
+  end
+
+  def call(env)
+    path = env["PATH_INFO"]
+    if path =~ /^#{Regexp.quote(@location)}/
+      resp = @file_server.call(env)
+      return resp unless resp[0] == 404
+    end
+    @app.call(env)
+  end
+end
+CODE
+
+%w{development, test, cucumber}.each do |env|
+  append_file "/config/#{env}.rb", %{
+config.middleware.use 'JavascriptsHost'
+}
+end
+
 # -- Stylesheets and compass
 
 run 'compass --rails -f blueprint .'
