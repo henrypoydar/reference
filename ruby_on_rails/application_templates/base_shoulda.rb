@@ -79,7 +79,7 @@ end
 Rails.boot!
 }
 
-run 'bundle install'
+run 'bundle lock; bundle install'
 
 # -- Cucumber setup
 
