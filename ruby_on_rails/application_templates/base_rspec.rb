@@ -81,14 +81,6 @@ Rails.boot!
 
 run 'bundle lock; bundle install'
 
-# -- Cucumber setup
-
-run "ruby script/generate cucumber --testunit --webrat"
-
-# -- Rspec generation
-
-generate :rspec
-
 # -- Database configuration
 
 run "rm -rf config/database.yml"
@@ -166,6 +158,14 @@ CODE
 config.middleware.use 'JavascriptsHost'
 }
 end
+
+# -- Cucumber setup
+
+run "ruby script/generate cucumber --rspec --webrat"
+
+# -- Rspec generation
+
+generate :rspec
 
 # -- Stylesheets and compass
 

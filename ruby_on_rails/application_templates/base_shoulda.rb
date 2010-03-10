@@ -81,10 +81,6 @@ Rails.boot!
 
 run 'bundle lock; bundle install'
 
-# -- Cucumber setup
-
-run "ruby script/generate cucumber --testunit --webrat"
-
 # -- Database configuration
 
 run "rm -rf config/database.yml"
@@ -162,6 +158,10 @@ CODE
 config.middleware.use 'JavascriptsHost'
 }
 end
+
+# -- Cucumber setup
+
+run "ruby script/generate cucumber --testunit --webrat"
 
 # -- Stylesheets and compass
 
