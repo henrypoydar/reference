@@ -81,29 +81,6 @@ Rails.boot!
 
 run 'bundle lock; bundle install'
 
-# -- Database configuration
-
-run "rm -rf config/database.yml"
-file 'config/database.yml.sample', <<-CODE
-development:
-  adapter: sqlite3
-  database: db/development.sqlite3
-  timeout: 5000
-
-sqlite-test: &sqlite-test
-  adapter: sqlite3
-  database: db/test.sqlite3
-  timeout: 5000
-  
-test:
-  <<: *sqlite-test
-  
-cucumber:
-  <<: *sqlite-test
-  database: db/cucumber.sqlite3
-CODE
-run "cp config/database.yml.sample config/database.yml"
-
 # -- Javascripts (jQuery, Jammit)
 
 jquery_file_name = 'jquery-1.4.2.js'
@@ -170,6 +147,29 @@ generate :rspec
 # -- Stylesheets and compass
 
 run 'compass --rails -f blueprint .'
+
+# -- Database configuration
+
+run "rm -rf config/database.yml"
+file 'config/database.yml.sample', <<-CODE
+development:
+  adapter: sqlite3
+  database: db/development.sqlite3
+  timeout: 5000
+
+sqlite-test: &sqlite-test
+  adapter: sqlite3
+  database: db/test.sqlite3
+  timeout: 5000
+  
+test:
+  <<: *sqlite-test
+  
+cucumber:
+  <<: *sqlite-test
+  database: db/cucumber.sqlite3
+CODE
+run "cp config/database.yml.sample config/database.yml"
 
 # -- Initial application layout
 
